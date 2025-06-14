@@ -1,0 +1,46 @@
+# Entorno virtual
+venv/
+.env
+.env.*
+
+# Archivos de configuración del IDE/editor
+.vscode/
+.idea/
+*.code-workspace
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pkl
+
+# Archivos de log / debug
+*.log
+*.sqlite3
+*.db
+*.pid
+
+# Archivos temporales o de sistema
+.DS_Store
+Thumbs.db
+
+# Uvicorn reload cache (si se usara con watchgod)
+*.reload
+
+# Archivos estáticos si son generados
+/static/
+*.html
+
+# Migrations (si usaras Alembic y no querés versionarlas aún)
+migrations/
+
+# Archivos de compilación
+build/
+dist/
+*.egg-info/
+
+# Cache de pip
+pip-wheel-metadata/
+__pypackages__/
