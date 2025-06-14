@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Racing API</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div x-data="adminPanel()" class="container mx-auto p-4">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Panel de Administración</h1>
+            <p class="text-gray-600">Gestiona campeonatos, pilotos y fechas</p>
+        </header>
+
+        <!-- Navegación por pestañas -->
+        <div class="mb-6">
+            <nav class="flex space-x-4">
+                <button @click="activeTab = 'campeonatos'" 
+                        :class="activeTab === 'campeonatos' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                        class="px-4 py-2 rounded-lg transition">
+                    Campeonatos
+                </button>
+                <button @click="activeTab = 'pilotos'" 
+                        :class="activeTab === 'pilotos' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                        class="px-4 py-2 rounded-lg transition">
+                    Pilotos
+                </button>
+                <button @click="activeTab = 'fechas'" 
+                        :class="activeTab === 'fechas' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                        class="px-4 py-2 rounded-lg transition">
+                    Fechas
+                </button>
+                <button @click="activeTab = 'api'" 
+                        :class="activeTab === 'api' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                        class="px-4 py-2 rounded-lg transition">
+                    API Docs
+                </button>
+            </nav>
+        </div>
+
+        <!-- Panel Campeonatos -->
+        <div x-show="activeTab === 'campeonatos'" class="bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Campeonatos</h2>
+                <button @click="showCampeonatoForm = true" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Nuevo Campeonato
+                </button>
+            </div>
+
+            <!-- Formulario nuevo campeonato -->
+            <div x-show="showCampeonatoForm" class="mb-6 p-4 border rounded-lg bg-gray-50">
+                <h3 class="text-lg font-medium mb-3">Nuevo Campeonato</h3>
+                <form @submit.prevent="createCampeonato">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" x-model="newCampeonato.nombre" placeholder="Nombre del campeonato" 
+                               class="border rounded px-3 py-2" required>
+                        <input type="number" x-model="newCampeonato.anio" placeholder="Año" 
+                               class="border rounded px-3 py-2" required>
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Crear
+                        </button>
+                        <button type="button" @click="showCampeonatoForm = false" 
+                                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lista de campeonatos -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="border border-gray-300 px-4 py-2 text-left">Nombre</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Año</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="campeonato in campeonatos" :key="campeonato.id">
+                            <tr>
+                                <td class="border border-gray-300 px-4 py-2" x-text="campeonato.nombre"></td>
+                                <td class="border border-gray-300 px-4 py-2" x-text="campeonato.anio"></td>
+                                <td class="border border-gray-300 px-4 py-2 text-xs text-gray-500" x-text="campeonato.id"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Panel Pilotos -->
+        <div x-show="activeTab === 'pilotos'" class="bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Pilotos</h2>
+                <button @click="showPilotoForm = true" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Nuevo Piloto
+                </button>
+            </div>
+
+            <!-- Formulario nuevo piloto -->
+            <div x-show="showPilotoForm" class="mb-6 p-4 border rounded-lg bg-gray-50">
+                <h3 class="text-lg font-medium mb-3">Nuevo Piloto</h3>
+                <form @submit.prevent="createPiloto">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" x-model="newPiloto.nombre" placeholder="Nombre del piloto" 
+                               class="border rounded px-3 py-2" required>
+                        <input type="text" x-model="newPiloto.pais" placeholder="País" 
+                               class="border rounded px-3 py-2">
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Crear
+                        </button>
+                        <button type="button" @click="showPilotoForm = false" 
+                                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lista de pilotos -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="border border-gray-300 px-4 py-2 text-left">Nombre</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">País</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="piloto in pilotos" :key="piloto.id">
+                            <tr>
+                                <td class="border border-gray-300 px-4 py-2" x-text="piloto.nombre"></td>
+                                <td class="border border-gray-300 px-4 py-2" x-text="piloto.pais || '-'"></td>
+                                <td class="border border-gray-300 px-4 py-2 text-xs text-gray-500" x-text="piloto.id"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Panel Fechas -->
+        <div x-show="activeTab === 'fechas'" class="bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Fechas</h2>
+                <button @click="showFechaForm = true" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Nueva Fecha
+                </button>
+            </div>
+
+            <!-- Formulario nueva fecha -->
+            <div x-show="showFechaForm" class="mb-6 p-4 border rounded-lg bg-gray-50">
+                <h3 class="text-lg font-medium mb-3">Nueva Fecha</h3>
+                <form @submit.prevent="createFecha">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" x-model="newFecha.nombre" placeholder="Nombre de la fecha" 
+                               class="border rounded px-3 py-2" required>
+                        <select x-model="newFecha.campeonato_id" class="border rounded px-3 py-2" required>
+                            <option value="">Seleccionar campeonato</option>
+                            <template x-for="campeonato in campeonatos" :key="campeonato.id">
+                                <option :value="campeonato.id" x-text="campeonato.nombre + ' - ' + campeonato.anio"></option>
+                            </template>
+                        </select>
+                        <input type="date" x-model="newFecha.fecha_desde" placeholder="Fecha desde" 
+                               class="border rounded px-3 py-2" required>
+                        <input type="date" x-model="newFecha.fecha_hasta" placeholder="Fecha hasta" 
+                               class="border rounded px-3 py-2">
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Crear
+                        </button>
+                        <button type="button" @click="showFechaForm = false" 
+                                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lista de fechas -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="border border-gray-300 px-4 py-2 text-left">Nombre</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Fecha Desde</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Fecha Hasta</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Circuito</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="fecha in fechas" :key="fecha.id">
+                            <tr>
+                                <td class="border border-gray-300 px-4 py-2" x-text="fecha.nombre"></td>
+                                <td class="border border-gray-300 px-4 py-2" x-text="fecha.fecha_desde"></td>
+                                <td class="border border-gray-300 px-4 py-2" x-text="fecha.fecha_hasta || '-'"></td>
+                                <td class="border border-gray-300 px-4 py-2" x-text="fecha.circuito_nombre || '-'"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Panel API Docs -->
+        <div x-show="activeTab === 'api'" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Documentación de la API</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-lg font-medium mb-2">Endpoints Principales</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg space-y-2">
+                        <div><code class="bg-blue-100 px-2 py-1 rounded">GET /api/campeonatos</code> - Lista todos los campeonatos</div>
+                        <div><code class="bg-blue-100 px-2 py-1 rounded">GET /api/pilotos?campeonato_id={id}</code> - Pilotos por campeonato</div>
+                        <div><code class="bg-blue-100 px-2 py-1 rounded">GET /api/fechas?campeonato_id={id}</code> - Fechas por campeonato</div>
+                        <div><code class="bg-blue-100 px-2 py-1 rounded">GET /api/carrera/{fecha_id}</code> - Resultados de carrera</div>
+                        <div><code class="bg-blue-100 px-2 py-1 rounded">GET /api/clasificacion/{fecha_id}</code> - Resultados de clasificación</div>
+                        <div><code class="bg-blue-100 px-2 py-1 rounded">GET /api/campeonato/{id}/posiciones</code> - Tabla de posiciones</div>
+                    </div>
+                </div>
+                <div>
+                    <a href="/docs" target="_blank" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 inline-block">
+                        Ver Documentación Completa (Swagger)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensajes de estado -->
+        <div x-show="message" class="fixed top-4 right-4 p-4 rounded-lg shadow transition-opacity duration-300"
+             :class="messageType === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
+            <span x-text="message"></span>
+        </div>
+    </div>
+
+    <script>
+        function adminPanel() {
+            return {
+                activeTab: 'campeonatos',
+                campeonatos: [],
+                pilotos: [],
+                fechas: [],
+                
+                showCampeonatoForm: false,
+                showPilotoForm: false,
+                showFechaForm: false,
+                
+                newCampeonato: { nombre: '', anio: new Date().getFullYear() },
+                newPiloto: { nombre: '', pais: '' },
+                newFecha: { nombre: '', campeonato_id: '', fecha_desde: '', fecha_hasta: '' },
+                
+                message: '',
+                messageType: 'success',
+
+                async init() {
+                    await this.loadCampeonatos();
+                    await this.loadPilotos();
+                    await this.loadFechas();
+                },
+
+                async loadCampeonatos() {
+                    try {
+                        const response = await fetch('/api/campeonatos');
+                        this.campeonatos = await response.json();
+                    } catch (error) {
+                        this.showMessage('Error cargando campeonatos', 'error');
+                    }
+                },
+
+                async loadPilotos() {
+                    try {
+                        const response = await fetch('/api/pilotos');
+                        this.pilotos = await response.json();
+                    } catch (error) {
+                        this.showMessage('Error cargando pilotos', 'error');
+                    }
+                },
+
+                async loadFechas() {
+                    try {
+                        const response = await fetch('/api/fechas');
+                        this.fechas = await response.json();
+                    } catch (error) {
+                        this.showMessage('Error cargando fechas', 'error');
+                    }
+                },
+
+                async createCampeonato() {
+                    try {
+                        const response = await fetch('/admin/campeonatos', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newCampeonato)
+                        });
+
+                        if (response.ok) {
+                            this.showMessage('Campeonato creado exitosamente', 'success');
+                            this.newCampeonato = { nombre: '', anio: new Date().getFullYear() };
+                            this.showCampeonatoForm = false;
+                            await this.loadCampeonatos();
+                        } else {
+                            throw new Error('Error al crear campeonato');
+                        }
+                    } catch (error) {
+                        this.showMessage('Error al crear campeonato', 'error');
+                    }
+                },
+
+                async createPiloto() {
+                    try {
+                        const response = await fetch('/admin/pilotos', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newPiloto)
+                        });
+
+                        if (response.ok) {
+                            this.showMessage('Piloto creado exitosamente', 'success');
+                            this.newPiloto = { nombre: '', pais: '' };
+                            this.showPilotoForm = false;
+                            await this.loadPilotos();
+                        } else {
+                            throw new Error('Error al crear piloto');
+                        }
+                    } catch (error) {
+                        this.showMessage('Error al crear piloto', 'error');
+                    }
+                },
+
+                async createFecha() {
+                    try {
+                        const response = await fetch('/admin/fechas', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newFecha)
+                        });
+
+                        if (response.ok) {
+                            this.showMessage('Fecha creada exitosamente', 'success');
+                            this.newFecha = { nombre: '', campeonato_id: '', fecha_desde: '', fecha_hasta: '' };
+                            this.showFechaForm = false;
+                            await this.loadFechas();
+                        } else {
+                            throw new Error('Error al crear fecha');
+                        }
+                    } catch (error) {
+                        this.showMessage('Error al crear fecha', 'error');
+                    }
+                },
+
+                showMessage(text, type) {
+                    this.message = text;
+                    this.messageType = type;
+                    setTimeout(() => {
+                        this.message = '';
+                    }, 3000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
